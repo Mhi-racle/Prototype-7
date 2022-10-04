@@ -20,6 +20,7 @@ public class Ring : MonoBehaviour
         {
             audioManager.Play("whoosh");
             GameManager.numberOfPassedRings++;
+            GameManager.score++;
             Destroy(gameObject);
         }
     }

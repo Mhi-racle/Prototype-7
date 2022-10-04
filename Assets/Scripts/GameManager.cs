@@ -2,14 +2,19 @@
 using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 
 public class GameManager : MonoBehaviour
 {
     public static bool gameOver = false;
     public static bool levelCompleted = false;
+    public static bool isGameStarted = false;
+    public static bool mute = false;
     public GameObject gameOverPanel;
     public GameObject levelCompletedPanel;
+    public GameObject gamePlayPanel;
+    public GameObject startMenuPanel;
 
     public static int currentLevelIndex;
     public TextMeshProUGUI currentLevelText;
@@ -18,6 +23,9 @@ public class GameManager : MonoBehaviour
     public Slider progressSlider;
 
     public static int numberOfPassedRings;
+    public static int score = 0;
+    public TextMeshProUGUI scoreText;
+    public TextMeshProUGUI highScoreText;
     private void Awake()
     {
         // PlayerPrefs.DeleteAll();
@@ -31,6 +39,8 @@ public class GameManager : MonoBehaviour
         gameOver = false;
         levelCompleted = false;
         numberOfPassedRings = 0;
+        highScoreText.text = "Best Score\n" + PlayerPrefs.GetInt("HighScore", 0);
+        isGameStarted = false;
     }
 
     // Update is called once per frame
@@ -44,6 +54,20 @@ public class GameManager : MonoBehaviour
         int progress = numberOfPassedRings * 100 / FindObjectOfType<HelixManager>().numberOfRings;
         progressSlider.value = progress;
 
+
+        //display score
+        scoreText.text = score.ToString();
+
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began && !isGameStarted)
+        {
+            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
+            {
+                return;
+            }
+            isGameStarted = true;
+            gamePlayPanel.SetActive(true);
+            startMenuPanel.SetActive(false);
+        }
         if (gameOver)
         {
             Time.timeScale = 0;
@@ -51,6 +75,11 @@ public class GameManager : MonoBehaviour
 
             if (Input.GetButtonDown("Fire1"))
             {
+                if (score > PlayerPrefs.GetInt("HighScore", 0))
+                {
+                    PlayerPrefs.SetInt("HighScore", score);
+                }
+                score = 0;
                 SceneManager.LoadScene("Level");
             }
         }
